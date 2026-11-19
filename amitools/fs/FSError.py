@@ -23,6 +23,9 @@ INVALID_VOLUME_NAME = 22
 INVALID_COMMENT = 23
 INVALID_DIR_CACHE_BLOCK = 24
 INVALID_ENTRY_BLOCK = 25
+INVALID_ANODE = 26
+INVALID_RESERVED_BLOCK = 27
+VOLUME_READ_ONLY = 28
 
 error_names = {
     INVALID_BOOT_BLOCK: "Invalid Boot Block",
@@ -50,6 +53,9 @@ error_names = {
     INVALID_COMMENT: "Invalid comment",
     INVALID_DIR_CACHE_BLOCK: "Invalid DirCache Block",
     INVALID_ENTRY_BLOCK: "Invalid Entry Block",
+    INVALID_ANODE: "Invalid Anode",
+    INVALID_RESERVED_BLOCK: "Invalid Reserved Block",
+    VOLUME_READ_ONLY: "Volume is read-only",
 }
 
 

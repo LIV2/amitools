@@ -6,8 +6,9 @@ import unicodedata
 from .ADFSDir import ADFSDir
 from .ADFSFile import ADFSFile
 from .ADFSNode import check_comment
-from .ADFSVolume import ADFSVolume
 from .MetaDB import MetaDB
+from .pfs3 import create_volume
+from .pfs3.Const import DEFAULT_FNSIZE, MAX_FNSIZE
 from . import DosType
 from amitools.fs.block.BootBlock import BootBlock
 from amitools.fs.blkdev.BlkDevFactory import BlkDevFactory
@@ -247,9 +248,31 @@ class Imager:
             meta_info = None
             if dos_type is None:
                 dos_type = DosType.DOS0
-        volume = ADFSVolume(blkdev)
-        volume.create(FSString(name), meta_info, dos_type=dos_type)
-        return volume
+        options = {}
+        if DosType.is_pfs(dos_type):
+            # PFS3 names can be longer than 31 characters if the volume is
+            # made for them
+            longest = self._longest_name(in_path)
+            options["fnsize"] = min(max(DEFAULT_FNSIZE, longest + 1), MAX_FNSIZE)
+        return create_volume(
+            blkdev, FSString(name), meta_info, dos_type=dos_type, **options
+        )
+
+    def _longest_name(self, in_path):
+        """the length of the longest Amiga name in the tree at in_path"""
+        longest = 0
+        if in_path is None or not os.path.isdir(in_path):
+            return longest
+        for root, dirs, files in os.walk(in_path):
+            for name in dirs + files:
+                if self.meta_fsuae.is_meta_file(os.path.join(root, name)):
+                    continue
+                try:
+                    n = len(FSString(name).get_ami_str())
+                except UnicodeEncodeError:
+                    continue
+                longest = max(longest, n)
+        return longest
 
     def pack_root(self, in_path, volume):
         self.pack_dir(in_path, volume.get_root_dir())
